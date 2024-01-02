@@ -7,7 +7,7 @@ from . models import Organizer, Attendee
 @receiver(post_save, sender=get_user_model())
 def create_profile(sender, instance, created, **kwargs):
     if created:
-        if instance.user_type == 'Organizer':
+        if instance.user_type == 'organizer':
             Organizer.objects.create(user=instance)
-        elif instance.user_type == 'Attendee':
+        elif instance.user_type == 'attendee':
             Attendee.objects.create(user=instance)

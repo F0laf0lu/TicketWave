@@ -10,8 +10,8 @@ class CustomUser(AbstractUser):
     ATTENDEE = 'attendee'
 
     USER_TYPE = [
-        (ORGANIZER, ('Organizer')),
-        (ATTENDEE, ('Attendee'))
+        (ORGANIZER, ('organizer')),
+        (ATTENDEE, ('attendee'))
     ]
 
     username = None

@@ -13,7 +13,7 @@ class EventsTestCase(APITestCase):
         self.organizer_user = get_user_model().objects.create_user(
             email='organizer@example.com',
             password='password',
-            user_type='Organizer'
+            user_type='organizer'
         )
         self.organizer = Organizer.objects.get(user=self.organizer_user)
 
@@ -64,7 +64,7 @@ class EventsTestCase(APITestCase):
         attendee_user = get_user_model().objects.create_user(
             email='attendee@example.com',
             password='password',
-            user_type='Attendee'
+            user_type='attendee'
         )
         self.client.force_login(attendee_user)
         attendee = Attendee.objects.get(user=attendee_user)
@@ -110,7 +110,7 @@ class TicketTestCase(EventsTestCase):
         attendee_user = get_user_model().objects.create_user(
             email='attendee@example.com',
             password='password',
-            user_type='Attendee'
+            user_type='attendee'
         )
         self.client.force_login(attendee_user)
         url = reverse("ticket")
@@ -122,7 +122,7 @@ class TicketTestCase(EventsTestCase):
         attendee_user = get_user_model().objects.create_user(
             email='attendee@example.com',
             password='password',
-            user_type='Attendee'
+            user_type='attendee'
         )
         self.client.force_login(attendee_user)
         attendee = Attendee.objects.get(user=attendee_user)

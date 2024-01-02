@@ -16,7 +16,7 @@ from .permissions import EventDetailPermission, IsOrganizerPermission, GetTicket
 user = get_user_model()
 
 # Get all events
-# create event
+# create event 
 @api_view(['GET', 'POST'])
 @permission_classes([IsOrganizerPermission])
 def events(request):
@@ -78,7 +78,6 @@ def get_ticket(request, event_id):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 # Get all tickets
