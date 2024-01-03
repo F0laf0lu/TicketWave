@@ -49,3 +49,7 @@ class AttendeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendee
         fields = ["date_of_birth", "contact_phone"]
+
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()

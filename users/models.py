@@ -45,3 +45,10 @@ class Attendee(models.Model):
     def __str__(self):
         return self.user.email 
 
+
+class OneTimePassword():
+    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    otp_code = models.CharField(max_length=8)
+
+    def __str__(self) -> str:
+        return f'{self.user} - password'

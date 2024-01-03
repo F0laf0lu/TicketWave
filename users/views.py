@@ -3,10 +3,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+
+
+
+from users.utils import send_code_to_user
 from users.models import Attendee, Organizer
-
-
-from users.serializers import AttendeeSerializer, OrganizerSerializer, UserRegisterSerializer
+from users.serializers import AttendeeSerializer, EmailSerializer, OrganizerSerializer, UserRegisterSerializer
 from users.permissions import IsNotAuthenticated
 
 # Create your views here.
@@ -54,4 +56,23 @@ def attendee_profile(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Permission - Only unverified users can access this
+@api_view(['POST'])
+def verify_email(request):
+    email = request.user.email
+    if request.method == 'POST':
+        serializer = EmailSerializer(data= {'email':email})
+        if serializer.is_valid():
+            # Send otp to email
+            send_code_to_user()
+            print(serializer.validated_data)
+            return Response(
+                {
+                    "message": "Email verified successfully.", 
+                    "email":serializer.data['email']
+                }, 
+                status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
