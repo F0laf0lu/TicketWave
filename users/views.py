@@ -27,7 +27,7 @@ def RegisterUser(request):
 
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
-def organzier_profile(request):
+def organizer_profile(request):
     user = get_object_or_404(Organizer, user=request.user)
     if request.method == 'GET':
         serializer = OrganizerSerializer(user)
