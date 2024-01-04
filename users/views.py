@@ -8,8 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from users.utils import send_code_to_user
 from users.models import Attendee, Organizer
-from users.serializers import AttendeeSerializer, EmailSerializer, OrganizerSerializer, UserRegisterSerializer
+from users.serializers import AttendeeSerializer, OrganizerSerializer, UserRegisterSerializer
 from users.permissions import IsNotAuthenticated
+import pyotp
 
 # Create your views here.
 
@@ -64,15 +65,40 @@ def attendee_profile(request):
 def verify_email(request):
     email = request.user.email
     if request.method == 'POST':
-        serializer = EmailSerializer(data= {'email':email})
-        if serializer.is_valid():
-            # Send otp to email
-            send_code_to_user()
-            print(serializer.validated_data)
-            return Response(
+        # Send otp to user email
+        send_code_to_user(email)
+        return Response(
                 {
-                    "message": "Email verified successfully.", 
-                    "email":serializer.data['email']
+                    "message": "OTP sent successfully to your email", 
+                    "email":email
                 }, 
                 status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def verify(request):
+
+    if request.method == 'POST':
+        otpcode = request.data.get('otp')
+        user = request.user
+
+        i, secret_key = user.secret_key.split("-")
+        hotp = pyotp.HOTP(secret_key)
+
+        # Verify code
+        if hotp.verify(otpcode, int(i)):
+
+            # Verify user if code
+            if not user.is_verified:
+                user.is_verified= True
+                user.save()
+
+                return Response({
+                    'message':'Email verification successful'
+                }, status=status.HTTP_200_OK)
+            return Response({'message': 'User is already verified'} , status=status.HTTP_204_NO_CONTENT)
+
+        return Response({
+                    'message': 'Invalid OTP code'
+                },  status=status.HTTP_400_BAD_REQUEST)

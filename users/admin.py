@@ -7,18 +7,20 @@ from users.models import CustomUser, Organizer, Attendee
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    list_display = ['email', 'first_name', 'last_name', "user_type", "is_staff", "is_active"]
+    list_display = ['email', 'is_verified', "user_type", "is_staff", "is_active"]
     list_filter = ["user_type", "is_staff", "is_active"]
 
     fieldsets = (
         ('Required', {'fields': ('email', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name')}),
-        ('Type', {'fields': ('user_type',)}),
+        ('Type', {'fields': ('user_type','is_verified')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
         
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
 
+
+    # Fieldsets to show when adding newuser
     add_fieldsets = (
         (None, {
             "classes": ("wide",),

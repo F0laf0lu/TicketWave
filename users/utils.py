@@ -1,25 +1,44 @@
 from django.core.mail import EmailMessage
 from django.contrib.auth import get_user_model
 import pyotp
-
+import random
 from ticketwave import settings
-from users.models import OneTimePassword
 
-def generate_otp():
-    totp = pyotp.TOTP('base32secret3232', interval=60)
-    otp_code = totp.now()
-    return otp_code
+# def generate_otp():
+#     totp = pyotp.TOTP('base32secret3232', interval=60)
+#     otp_code = totp.now()
+#     return otp_code
+
+
+# def generate_key():
+#     # Generate TOTP secret key for the user
+#     totp = pyotp.TOTP(pyotp.random_base32(), interval=60)
+#     secret_key = totp.secret
+#     totp_code = totp.now()
+#     return totp_code, secret_key
+
+
+def generate_key():
+    # Generate TOTP secret key for the user
+    i = random.randint(0,1000000)
+    hotp = pyotp.HOTP(pyotp.random_base32())
+    secret_key = hotp.secret
+    hotp_code = hotp.at(i)
+
+    return i, hotp_code, secret_key
+
+
 
 def send_code_to_user(email):
     subject = "OTP code for email verification"
-    otp_code = generate_otp()
-    user = get_user_model().objects.get(email)
+    i, hotp_code, secret_key = generate_key()
+    user = get_user_model().objects.get(email=email)
+    user.secret_key = str(i) + '-' + secret_key
+    user.save()
 
-    email_body = f'Hello, here is your requested otpcode {otp_code}. If you did not request this contact support'
+    email_body = f'Hello, here is your requested otpcode {hotp_code}. If you did not request this contact support'
 
     from_email = settings.DEFAULT_FROM_EMAIL
-
-    OneTimePassword.objects.create(user=user, otp_code=otp_code)
 
     msg = EmailMessage(
         subject=subject,

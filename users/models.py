@@ -17,6 +17,8 @@ class CustomUser(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
     user_type = models.CharField(max_length=20, choices=USER_TYPE, null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
+    secret_key = models.CharField(max_length=30, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add = True)
 
     USERNAME_FIELD = 'email'
@@ -44,11 +46,3 @@ class Attendee(models.Model):
 
     def __str__(self):
         return self.user.email 
-
-
-class OneTimePassword():
-    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
-    otp_code = models.CharField(max_length=8)
-
-    def __str__(self) -> str:
-        return f'{self.user} - password'
