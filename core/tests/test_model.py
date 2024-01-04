@@ -11,9 +11,11 @@ class EventModelTests(TestCase):
         self.organizer_user = get_user_model().objects.create_user(
             email='organizer@example.com',
             password='password',
-            user_type='Organizer'
+            user_type='organizer'
         )
         self.organizer = Organizer.objects.get(user=self.organizer_user)
+
+
 
     def test_event_creation(self):
         event = Event.objects.create(
@@ -29,14 +31,14 @@ class TicketModelTest(TestCase):
         self.organizer_user = get_user_model().objects.create_user(
             email='organizer@example.com',
             password='password',
-            user_type='Organizer'
+            user_type='organizer'
         )
         self.organizer = Organizer.objects.get(user=self.organizer_user)
 
         self.attendee_user = get_user_model().objects.create_user(
             email='attendee@example.com',
             password='password',
-            user_type='Attendee'
+            user_type='attendee'
         )
         self.attendee = Attendee.objects.get(user=self.attendee_user)
 

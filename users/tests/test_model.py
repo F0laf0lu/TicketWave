@@ -19,13 +19,13 @@ class CustomUserTests(TestCase):
         self.user1 = User.objects.create_user(
             email = 'testuser1@app.com',
             password = 'testuser',
-            user_type = 'Organizer'
+            user_type = 'organizer'
         )
 
         self.user2 = User.objects.create_user(
             email = 'testuser2@app.com',
             password = 'testuser',
-            user_type = 'Attendee'
+            user_type = 'attendee'
         )
 
     def test_create_user(self):
@@ -34,6 +34,7 @@ class CustomUserTests(TestCase):
         self.assertTrue(self.user.is_active)
         self.assertFalse(self.user.is_superuser)
         self.assertFalse(self.user.is_staff)
+        self.assertFalse(self.user.is_verified)
 
     def test_organizer_profile_created(self):
         user = Organizer.objects.get(user=self.user1)
@@ -64,4 +65,5 @@ class CustomUserTests(TestCase):
         self.assertTrue(user.is_active)
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+        self.assertTrue(user.is_verified)
 

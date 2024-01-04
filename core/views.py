@@ -75,6 +75,7 @@ def get_ticket(request, event_id):
         context = {"event": event_id, 'user':request.user.id}
         serializer = TicketSerializer(data=request.data, context=context)
         if serializer.is_valid():
+            # Send ticket details to users mail or notifications - try signals
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

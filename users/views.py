@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.utils import send_code_to_user
 from users.models import Attendee, Organizer
 from users.serializers import AttendeeSerializer, OrganizerSerializer, UserRegisterSerializer
-from users.permissions import IsNotAuthenticated
+from users.permissions import IsNotAuthenticated, IsUnverified
 import pyotp
 
 # Create your views here.
@@ -62,6 +62,7 @@ def attendee_profile(request):
 
 # Permission - Only unverified users can access this
 @api_view(['POST'])
+@permission_classes([IsUnverified])
 def verify_email(request):
     email = request.user.email
     if request.method == 'POST':
@@ -77,8 +78,8 @@ def verify_email(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsUnverified])
 def verify(request):
-
     if request.method == 'POST':
         otpcode = request.data.get('otp')
         user = request.user

@@ -6,3 +6,11 @@ class IsNotAuthenticated(BasePermission):
 
     def has_permission(self, request, view):
         return not request.user.is_authenticated
+    
+
+class IsUnverified(BasePermission):
+
+    message = "You're verified"
+
+    def has_permission(self, request, view):
+        return not request.user.is_verified

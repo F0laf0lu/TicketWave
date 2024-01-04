@@ -53,13 +53,19 @@ Ensure you have the following prerequisites installed:
         python manage.py migrate
     ```
 
+5. Run Tests, ensure all test passes. If there are failures please raise an issue.
 
-5. Start the development server::
+    ```
+        python manage.py test
+    ```
+
+
+6. Start the development server after all test passes.
     ```
         python manage.py runserver
     ```
 
-6. The app is running at http://127.0.0.1:8000/. Open on your preferred broser
+7. The app is running at http://127.0.0.1:8000/. Open on your preferred broser
 
 
 
