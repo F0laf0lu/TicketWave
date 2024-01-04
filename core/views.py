@@ -31,6 +31,7 @@ def events(request):
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
             serializer.validated_data['organizer'] = organizer
+            
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         

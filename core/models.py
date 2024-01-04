@@ -9,20 +9,29 @@ class Event(models.Model):
     time = models.DateTimeField()
     venue = models.CharField(max_length=100)
     ticket_price = models.DecimalField(max_digits=10, decimal_places=2)
-    organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE,related_name='events')
+    organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE, related_name='events')
 
     def __str__(self):
         return self.name
+    
+
+class TicketType(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="ticket_type")
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    details = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.event.name} {self.name} Ticket'
 
 
 class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='tickets')
+    ticket_type = models.ForeignKey(TicketType, on_delete=models.CASCADE, null=True)
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE, related_name='tickets') 
     ticket_number = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     purchase_date = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False) 
-
-
 
     def __str__(self):
             return f'Ticket {self.ticket_number} for {self.event.name} by {self.attendee.user.email}'
