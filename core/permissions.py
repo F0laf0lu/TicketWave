@@ -41,16 +41,34 @@ class GetEventTicketsPermission(BasePermission):
 
 class GetTicketPermission(BasePermission):
     '''Allos only attendees to be able to get a ticket to an event'''
+    message = "You're either using an unverified email or have a ticket for this event already or you're are not an event attendee"
 
     def has_permission(self, request, view):
-
         # Allos access to vie only if the user is an attendee
         user = request.user.id
+        
+        if user is None:
+            return False
+        
+        if request.user.user_type == 'organizer':
+            return False
+        
+        if not request.user.is_verified:
+            
+            return False
         
         try:
             attendee = get_object_or_404(Attendee, user=user)
         except Attendee.DoesNotExist:
             return False
+        
+        # Check if attendee has tickets to this event
+        from core.views import get_ticket
+        if get_ticket:
+            event = Event.objects.get(id=view.kwargs.get('event_id'))
+
+            if event.tickets.filter(attendee=attendee.id).exists():
+                return False
 
         return request.user and request.user.is_authenticated and attendee
 
@@ -58,8 +76,7 @@ class GetTicketPermission(BasePermission):
 class EventDetailPermission(BasePermission):
     '''This permission allows only Organizers make post reuest to create an event'''
     message = "You're not an Event Organizer"
-
-
+    
     def has_permission(self, request, view):
         # Permission to allo access to view
         return bool(request.user and request.user.is_authenticated)
@@ -78,7 +95,7 @@ class EventDetailPermission(BasePermission):
 
 
 class IsAttendeePermission(BasePermission):
-    '''This permission allows only attendee make post reuest to create an event'''
+    '''This permission allows only attendee make post reuest to get ticket to an event'''
     def has_permission(self, request, view):
         # Allos the user making post request is an organizer.
         user = request.user.id
@@ -90,7 +107,7 @@ class IsAttendeePermission(BasePermission):
 
 
 class IsTicketOnerPermission(BasePermission):
-    '''This permission allows only attendee make post reuest to create an event'''
+    '''This permission allows only attendee vie ticket details'''
     def has_permission(self, request, view):
         # Allos the user making post request is an organizer.
         ticket = get_object_or_404(Ticket, id=view.kwargs.get('ticket_id'))

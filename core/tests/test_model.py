@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from users.models import Organizer, Attendee
-from core.models import Event, Ticket
+from core.models import Event, Ticket, TicketType
 
 # Create your tests here.
 
@@ -15,16 +15,14 @@ class EventModelTests(TestCase):
         )
         self.organizer = Organizer.objects.get(user=self.organizer_user)
 
-
-
     def test_event_creation(self):
         event = Event.objects.create(
             name='Test Event',
             time=timezone.now(),
             venue='Test Venue',
-            ticket_price=10.0,
             organizer=self.organizer
         )
+
 
 class TicketModelTest(TestCase):
     def setUp(self):
@@ -46,13 +44,20 @@ class TicketModelTest(TestCase):
             name='Test Event',
             time=timezone.now(),
             venue='Test Venue',
-            ticket_price=10.0,
             organizer=self.organizer
         )
+
+        self.ticket_type = TicketType.objects.create(
+            event = self.event,
+            name = 'Vip Tickets',
+            price = 700
+        )
+
 
     def test_ticket_creation(self):
         ticket = Ticket.objects.create(
             event=self.event,
+            ticket_type = self.ticket_type,
             attendee=self.attendee,
             ticket_number='123e4567-e89b-12d3-a456-426614174001'
         )

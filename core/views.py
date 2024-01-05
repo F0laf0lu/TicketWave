@@ -31,7 +31,6 @@ def events(request):
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
             serializer.validated_data['organizer'] = organizer
-            
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
@@ -39,7 +38,7 @@ def events(request):
     
 
 # Get a specific event
-@api_view(['GET','PUT', 'DELETE'])
+@api_view(['GET','PATCH', 'DELETE'])
 @permission_classes([EventDetailPermission])
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -47,7 +46,7 @@ def event_detail(request, event_id):
         serializer = EventSerializer(event)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    elif request.method == 'PATCH':
         serializer = EventSerializer(instance=event, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -68,12 +67,13 @@ def event_tickets(request, event_id):
         serializer = TicketSerializer(ticket, many=True)
         return Response(serializer.data)
 
-# get a ticket for an event
+
+# get a ticket for an event 
 @api_view(["POST"])
 @permission_classes([GetTicketPermission])
 def get_ticket(request, event_id):
     if request.method == 'POST':
-        context = {"event": event_id, 'user':request.user.id}
+        context = {"event": event_id, "user":request.user.id}
         serializer = TicketSerializer(data=request.data, context=context)
         if serializer.is_valid():
             # Send ticket details to users mail or notifications - try signals
@@ -92,11 +92,11 @@ def tickets(request):
         serializer = TicketSerializer(ticket, many=True)
         return Response(serializer.data)
 
+
 # Get ticket details
 @api_view(['GET'])
 @permission_classes([IsTicketOnerPermission])
 def ticket_detail(request, ticket_id):
-    attendee = get_object_or_404(Attendee, user=request.user.id)
     if request.method == 'GET':
         ticket  = get_object_or_404(Ticket, id=ticket_id)
         serializer = TicketSerializer(ticket)
