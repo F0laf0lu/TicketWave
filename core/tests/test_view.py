@@ -8,7 +8,6 @@ from users.models import Organizer, Attendee
 from core.models import Event, Ticket, TicketType
 
 class EventsTestCase(APITestCase):
-
     def setUp(self):
         self.organizer_user = get_user_model().objects.create_user(
             email='organizer@example.com',
@@ -27,27 +26,31 @@ class EventsTestCase(APITestCase):
             name='Event 1', 
             time = timezone.now(),
             venue='Venue 1',
-            organizer = self.organizer
+            organizer = self.organizer,
+            status = 'available'
         )
         
         self.event2 = Event.objects.create(
             name ='Event 2', 
             time = timezone.now(),
             venue='Venue 2',
-            organizer = self.organizer
+            organizer = self.organizer,
+            status = 'available'
         )
         
         #Create TicketTypes
         self.ticket_type1 = TicketType.objects.create(
             event = self.event1, 
             name = 'Vip Tickets',
-            price = 700
+            price = 700,
+            tickets_available = 1
         )
 
         self.ticket_type2 = TicketType.objects.create(
             event = self.event2, 
             name = 'Vip Tickets',    
-            price = 700
+            price = 700,
+            tickets_available = 1
         )
 
 
@@ -138,8 +141,9 @@ class EventsTestCase(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+
 class TicketTestCase(EventsTestCase):
-    def test_get_all_tickets(self):
+    def test_get_all_attendee_tickets(self):
         attendee_user = get_user_model().objects.create_user(
             email='attendee@example.com',
             password='password',
@@ -151,7 +155,7 @@ class TicketTestCase(EventsTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_get_specific_ticket(self):
+    def test_get_specific_attendee_ticket(self):
         attendee_user = get_user_model().objects.create_user(
             email='attendee@example.com',
             password='password',
@@ -166,3 +170,26 @@ class TicketTestCase(EventsTestCase):
         url = reverse("ticket-detail", kwargs={'ticket_id':ticket.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_ticket_available(self):
+        data = {
+            "ticket_type" : self.ticket_type1.pk
+        }
+
+        attendee_user = get_user_model().objects.create_user(
+            email='attendee@example.com',
+            password='password',
+            user_type='attendee',
+            is_verified = True
+        )
+
+        self.client.force_login(attendee_user)
+        attendee = Attendee.objects.get(user=attendee_user)
+
+        url = reverse("get-ticket", kwargs={'event_id':self.event1.id})
+
+        response = self.client.post(url, data, format='json')
+        ticket = Ticket.objects.filter(event=self.event1, attendee=attendee, is_used=False).exists()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(ticket)

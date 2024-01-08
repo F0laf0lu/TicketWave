@@ -26,12 +26,19 @@ class IsOrganizerPermission(BasePermission):
 class GetEventTicketsPermission(BasePermission):
     '''Only event creator can see the tickets gotten for his event'''
 
-    message = 'You did not create this event'
+    message = 'You are not the event organizer'
     def has_permission(self, request, view):
         from core.views import event_tickets
         if event_tickets:
-            event = get_object_or_404(Event, id=view.kwargs.get('event_id'))
-            organizer = event.organizer
+            
+            # event = get_object_or_404(Event, id=view.kwargs.get('event_id'))
+            try:
+                event = Event.objects.get(id=view.kwargs.get('event_id'))
+                organizer = event.organizer
+            except Event.DoesNotExist:
+                self.message = "No Event for given id"
+                return False
+            
             try:
                 request_org = Organizer.objects.get(user=request.user.id)
             except Organizer.DoesNotExist:

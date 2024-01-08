@@ -8,7 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from core.models import Event, Ticket
 from users.models import Attendee, Organizer
-from .serializers import EventSerializer, TicketSerializer
+from core.services import TicketService
+from .serializers import EventSerializer, SimpleTicketSerializer, TicketSerializer
 from .permissions import EventDetailPermission, IsOrganizerPermission, GetTicketPermission, GetEventTicketsPermission, IsAttendeePermission, IsTicketOnerPermission
 
 # Create your views here.
@@ -64,7 +65,7 @@ def event_detail(request, event_id):
 def event_tickets(request, event_id):
     if request.method == 'GET':
         ticket = Ticket.objects.filter(event=event_id)
-        serializer = TicketSerializer(ticket, many=True)
+        serializer = SimpleTicketSerializer(ticket, many=True)
         return Response(serializer.data)
 
 
@@ -76,9 +77,15 @@ def get_ticket(request, event_id):
         context = {"event": event_id, "user":request.user.id}
         serializer = TicketSerializer(data=request.data, context=context)
         if serializer.is_valid():
+            ticket_type_id = serializer.validated_data['ticket_type_id']
             # Send ticket details to users mail or notifications - try signals
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            success,message = TicketService.purchase_ticket(ticket_type_id)
+            if success:
+                serializer.save()
+                return Response({"message":message, "data":serializer.data},status=status.HTTP_201_CREATED)
+            else:
+                return Response({"message": message}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -9,7 +9,7 @@ class Event(models.Model):
     AVAILABLE = 'available'
 
     STATUS = [
-        (EXPIRED, ('organizer')),
+        (EXPIRED, ('expired')),
         (AVAILABLE, ('available'))
     ]
 
@@ -17,7 +17,7 @@ class Event(models.Model):
     time = models.DateTimeField()
     venue = models.CharField(max_length=100)
     organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE, related_name='events')
-    status = models.CharField(max_length=50, choices=STATUS)
+    status = models.CharField(max_length=50, choices=STATUS, default=AVAILABLE)
 
     def __str__(self):
         return f'{self.name} {self.id}'

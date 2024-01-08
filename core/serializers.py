@@ -8,7 +8,7 @@ from users.models import Attendee, Organizer
 class TicketTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketType
-        fields = ['name', 'price', 'details']
+        fields = ['id','name', 'price', 'details', 'tickets_available']
         read_only_fields = ['event']
 
 
@@ -18,7 +18,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ['name', 'time', 'venue', 'organizer', 'ticket_type']
+        fields = ['id', 'name', 'time', 'venue', 'status', 'organizer', 'ticket_type']
         read_only_fields = ['organizer']
 
     def create(self, validated_data):
@@ -47,16 +47,22 @@ class EventSerializer(serializers.ModelSerializer):
 
             try:
                 ticket_type_instance = TicketType.objects.get(event=instance, name=ticket_type_name)
+
                 ticket_type_instance.name = ticket_type.get('name',ticket_type_instance.name)
+
                 ticket_type_instance.price = ticket_type.get('price',ticket_type_instance.price)
+
+                ticket_type_instance.tickets_available = ticket_type.get('tickets_available',ticket_type_instance.tickets_available)
+
                 ticket_type_instance.details = ticket_type.get('details',ticket_type_instance.details)
+
                 ticket_type_instance.save()
                 updated_ids.append(ticket_type_instance.id)
 
             except TicketType.DoesNotExist:
                 ticket_type_instance = TicketType.objects.create(event=instance, **ticket_type)
                 updated_ids.append(ticket_type_instance.id)
-            
+
         for ticket_id in ids:   
             if ticket_id not in updated_ids:
                 TicketType.objects.get(id=ticket_id).delete()
@@ -64,6 +70,7 @@ class EventSerializer(serializers.ModelSerializer):
         return instance
 
 class TicketSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Ticket
         fields = "__all__"
@@ -82,11 +89,12 @@ class TicketSerializer(serializers.ModelSerializer):
         
         #get ticket_type for event
         try:
-            ticket_type = TicketType.objects.get(id=ticket_type_id.id, event=event)
+            ticket_type_id = TicketType.objects.get(id=ticket_type_id.id, event=event)
         except TicketType.DoesNotExist:
             raise serializers.ValidationError({'ticket type': 'Invalid ticket type obj'})
-        
+        attrs['ticket_type_id'] = ticket_type_id.id
         return attrs
+
 
     def create(self, validated_data):
         event_id = self.context.get('event')
@@ -97,3 +105,13 @@ class TicketSerializer(serializers.ModelSerializer):
         validated_data['event'] = event
         validated_data['attendee'] = attendee
         return Ticket.objects.create(**validated_data)
+    
+
+
+class SimpleTicketSerializer(serializers.ModelSerializer):
+    ticket_type  = TicketTypeSerializer()
+
+    class Meta:
+        model = Ticket
+        fields = "__all__"
+        read_only_fields = ['attendee', 'event']
