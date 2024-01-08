@@ -41,25 +41,27 @@ class GetEventTicketsPermission(BasePermission):
 
 class GetTicketPermission(BasePermission):
     '''Allos only attendees to be able to get a ticket to an event'''
-    message = "You're either using an unverified email or have a ticket for this event already or you're are not an event attendee"
 
     def has_permission(self, request, view):
         # Allos access to vie only if the user is an attendee
         user = request.user.id
         
         if user is None:
+            self.message = "User is not logged in"
             return False
         
         if request.user.user_type == 'organizer':
+            self.message = "Organizer does not have access"
             return False
         
         if not request.user.is_verified:
-            
+            self.message =  "Your email is unverified"
             return False
         
         try:
             attendee = get_object_or_404(Attendee, user=user)
         except Attendee.DoesNotExist:
+            self.message = "Attendee User does not exist"
             return False
         
         # Check if attendee has tickets to this event
@@ -68,6 +70,7 @@ class GetTicketPermission(BasePermission):
             event = Event.objects.get(id=view.kwargs.get('event_id'))
 
             if event.tickets.filter(attendee=attendee.id).exists():
+                self.message = "You already have a ticket to this event"
                 return False
 
         return request.user and request.user.is_authenticated and attendee

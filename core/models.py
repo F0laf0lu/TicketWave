@@ -5,10 +5,19 @@ from users.models import Attendee, Organizer
 # Create your models here.
 
 class Event(models.Model):
+    EXPIRED = 'expired'
+    AVAILABLE = 'available'
+
+    STATUS = [
+        (EXPIRED, ('organizer')),
+        (AVAILABLE, ('available'))
+    ]
+
     name = models.CharField(max_length = 100)
     time = models.DateTimeField()
     venue = models.CharField(max_length=100)
     organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE, related_name='events')
+    status = models.CharField(max_length=50, choices=STATUS)
 
     def __str__(self):
         return f'{self.name} {self.id}'
@@ -19,8 +28,9 @@ class TicketType(models.Model):
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     details = models.TextField(null=True, blank=True)
+    tickets_available = models.PositiveIntegerField(default=0)
 
-    def __str__(self):
+    def __str__(self): 
         return f'{self.id} {self.event.name} {self.name}  Ticket'
 
 
