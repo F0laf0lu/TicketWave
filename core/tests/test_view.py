@@ -50,7 +50,7 @@ class EventsTestCase(APITestCase):
             event = self.event2, 
             name = 'Vip Tickets',    
             price = 700,
-            tickets_available = 1
+            tickets_available = 0
         )
 
 
@@ -171,9 +171,9 @@ class TicketTestCase(EventsTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_ticket_available(self):
+    def test_ticket_unavailable(self):
         data = {
-            "ticket_type" : self.ticket_type1.pk
+            "ticket_type" : self.ticket_type2.pk
         }
 
         attendee_user = get_user_model().objects.create_user(
@@ -191,5 +191,5 @@ class TicketTestCase(EventsTestCase):
         response = self.client.post(url, data, format='json')
         ticket = Ticket.objects.filter(event=self.event1, attendee=attendee, is_used=False).exists()
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(ticket)
