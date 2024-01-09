@@ -1,4 +1,4 @@
-# Ticketwave
+# Ticketwave (Still under development)
 
 Ticketwave is a Django-based ticketing API designed to simplify the management of events and ticket purchases. This project serves as a Minimum Viable Product (MVP) aimed at providing a foundational structure for a ticketing system.
 
@@ -10,7 +10,7 @@ Organizing and attending events can be complex, and Ticketwave aims to streamlin
 
 - **Event Management:** Create, retrieve, update, and delete events with detailed information such as name, date, and venue.
 - **Ticket Management:** Generate and manage tickets associated with specific events, including options for retrieval, update, and deletion.
-- **Ticket Purchase:** Allow users to purchase tickets for their chosen events, creating a seamless experience for both event organizers and attendees.
+
 
 ### Why Ticketwave?
 
@@ -23,9 +23,8 @@ Organizing and attending events can be complex, and Ticketwave aims to streamlin
 
 Ensure you have the following prerequisites installed:
 
-- Python (version 3.x)
-- Django (version 3.x)
-- (Add any other dependencies)
+- Python (version 3.9)
+- Django (version 4.2)
 
 ### Installation
 
