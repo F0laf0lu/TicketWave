@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.urls import reverse
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model 
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 
@@ -19,7 +19,7 @@ class EventsTestCase(APITestCase):
         self.organizer = Organizer.objects.get(user=self.organizer_user)
 
         # Login User
-        self.client.force_login(user=self.organizer_user)
+        self.client.force_authenticate(user=self.organizer_user)
 
         # Create some events for testing
         self.event1 = Event.objects.create(
@@ -52,7 +52,6 @@ class EventsTestCase(APITestCase):
             price = 700,
             tickets_available = 0
         )
-
 
     def test_get_events(self):
         url = reverse("events")
@@ -98,7 +97,7 @@ class EventsTestCase(APITestCase):
             is_verified = True
         )
 
-        self.client.force_login(attendee_user)
+        self.client.force_authenticate(attendee_user)
 
         attendee = Attendee.objects.get(user=attendee_user)
 
@@ -142,49 +141,70 @@ class EventsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-class TicketTestCase(EventsTestCase):
-    def test_get_all_attendee_tickets(self):
-        attendee_user = get_user_model().objects.create_user(
-            email='attendee@example.com',
+
+
+
+
+
+
+
+
+
+class TicketTestCase(APITestCase):
+    def setUp(self):
+        self.organizer_user = get_user_model().objects.create_user(
+            email='organizer@example.com',
             password='password',
-            user_type='attendee',
+            user_type='organizer',
             is_verified = True
         )
-        self.client.force_login(attendee_user)
+        self.organizer = Organizer.objects.get(user=self.organizer_user)
+        self.event1 = Event.objects.create(
+            name='Event 1', 
+            time = timezone.now(),
+            venue='Venue 1',
+            organizer = self.organizer,
+            status = 'available'
+        )
+        #Create TicketTypes
+        self.ticket_type1 = TicketType.objects.create(
+            event = self.event1, 
+            name = 'Vip Tickets',
+            price = 700,
+            tickets_available = 1
+        )
+        self.attendee_user = get_user_model().objects.create_user(
+                    email='attendee@example.com',
+                    password='password',
+                    user_type='attendee',
+                    is_verified = True
+                )
+        self.client.force_authenticate(self.attendee_user)
+        
+
+
+
+    def test_get_all_attendee_tickets(self):
         url = reverse("ticket")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_specific_attendee_ticket(self):
-        attendee_user = get_user_model().objects.create_user(
-            email='attendee@example.com',
-            password='password',
-            user_type='attendee',
-            is_verified = True
-        )
-        self.client.force_login(attendee_user)
-
-        attendee = Attendee.objects.get(user=attendee_user)
+        attendee = Attendee.objects.get(user=self.attendee_user)
 
         ticket = Ticket.objects.create(event=self.event1, ticket_type=self.ticket_type1, attendee=attendee)
         url = reverse("ticket-detail", kwargs={'ticket_id':ticket.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_ticket_unavailable(self):
+
+
+    def ticket_unavailable(self):
         data = {
             "ticket_type" : self.ticket_type2.pk
         }
 
-        attendee_user = get_user_model().objects.create_user(
-            email='attendee@example.com',
-            password='password',
-            user_type='attendee',
-            is_verified = True
-        )
-
-        self.client.force_login(attendee_user)
-        attendee = Attendee.objects.get(user=attendee_user)
+        attendee = Attendee.objects.get(user=self.attendee_user)
 
         url = reverse("get-ticket", kwargs={'event_id':self.event1.id})
 

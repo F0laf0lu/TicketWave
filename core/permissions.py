@@ -10,11 +10,14 @@ class IsOrganizerPermission(BasePermission):
     message = "You're not an Event Organizer"
     def has_permission(self, request, view):
 
-        # Allos if the user is authenticated and reuest is not a post reuest
+        # Allows if the user is authenticated and request is not a post reuest
         if request.method in SAFE_METHODS and request.user.is_authenticated:
             return True
+        
+        if request.user.is_superuser:
+            return True
 
-        # Allos the user making post request is an organizer.
+        # Allows the user making post request is an organizer.
         user = request.user.id
         try:
             organizer = Organizer.objects.get(user=user)
@@ -28,6 +31,9 @@ class GetEventTicketsPermission(BasePermission):
 
     message = 'You are not the event organizer'
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+        
         from core.views import event_tickets
         if event_tickets:
             
@@ -50,6 +56,8 @@ class GetTicketPermission(BasePermission):
     '''Allos only attendees to be able to get a ticket to an event'''
 
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         # Allos access to vie only if the user is an attendee
         user = request.user.id
         
@@ -80,6 +88,9 @@ class GetTicketPermission(BasePermission):
                 self.message = "You already have a ticket to this event"
                 return False
 
+            if request.user.is_superuser:
+                return True
+
         return request.user and request.user.is_authenticated and attendee
 
 
@@ -88,10 +99,18 @@ class EventDetailPermission(BasePermission):
     message = "You're not an Event Organizer"
     
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+        
+        if request.method in SAFE_METHODS and request.user.is_authenticated:
+            return True
+        
         # Permission to allo access to view
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser:
+            return True
         # Permission to allo access to object methods (PUT,DELETE)
         from core.views import event_detail
         if event_detail:
@@ -107,6 +126,8 @@ class EventDetailPermission(BasePermission):
 class IsAttendeePermission(BasePermission):
     '''This permission allows only attendee make post reuest to get ticket to an event'''
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         # Allos the user making post request is an organizer.
         user = request.user.id
         try:
@@ -119,6 +140,8 @@ class IsAttendeePermission(BasePermission):
 class IsTicketOnerPermission(BasePermission):
     '''This permission allows only attendee vie ticket details'''
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         # Allos the user making post request is an organizer.
         ticket = get_object_or_404(Ticket, id=view.kwargs.get('ticket_id'))
         attendee = ticket.attendee

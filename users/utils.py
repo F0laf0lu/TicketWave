@@ -4,19 +4,6 @@ import pyotp
 import random
 from ticketwave import settings
 
-# def generate_otp():
-#     totp = pyotp.TOTP('base32secret3232', interval=60)
-#     otp_code = totp.now()
-#     return otp_code
-
-
-# def generate_key():
-#     # Generate TOTP secret key for the user
-#     totp = pyotp.TOTP(pyotp.random_base32(), interval=60)
-#     secret_key = totp.secret
-#     totp_code = totp.now()
-#     return totp_code, secret_key
-
 
 def generate_key():
     # Generate TOTP secret key for the user

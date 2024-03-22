@@ -3,6 +3,10 @@ from core.models import Event, Ticket, TicketType
 # Register your models here.
 
 
+class TicketInline(admin.TabularInline):
+    model = Ticket
+
+
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = ['name', 'organizer', 'event_status', 'event_date', 'event_time']
@@ -15,6 +19,10 @@ class EventAdmin(admin.ModelAdmin):
     
     def event_time(self, obj):
         return obj.time.time()
+    
+    inlines = [
+        TicketInline
+    ]
     
     event_status.short_description = 'Status'
     event_time.short_description = 'Time'

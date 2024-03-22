@@ -1,9 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 
 
 from core.models import Event, Ticket
@@ -76,7 +75,9 @@ def get_ticket(request, event_id):
     if request.method == 'POST':
         context = {"event": event_id, "user":request.user.id}
         serializer = TicketSerializer(data=request.data, context=context)
+
         if serializer.is_valid():
+            print(serializer.validated_data)
             ticket_type_id = serializer.validated_data['ticket_type_id']
             # Send ticket details to users mail or notifications - try signals
             success,message = TicketService.purchase_ticket(ticket_type_id)

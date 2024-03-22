@@ -21,7 +21,7 @@ class EventSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'time', 'venue', 'status', 'organizer', 'ticket_type']
         read_only_fields = ['organizer']
 
-    def create(self, validated_data):
+    def create(self, validated_data):   
         ticket_types_data = validated_data.pop('ticket_type', [])  
         event = Event.objects.create(**validated_data)
 
@@ -80,6 +80,9 @@ class TicketSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         ticket_type_id = attrs.get('ticket_type')
         event_id = self.context.get('event')
+        user = self.context.get('user')
+        attendee = get_object_or_404(Attendee, user=user)
+        
 
         #get events
         try: 

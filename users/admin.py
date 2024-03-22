@@ -7,7 +7,7 @@ from users.models import CustomUser, Organizer, Attendee
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    list_display = ['email', 'is_verified', "user_type", "is_staff", "is_active"]
+    list_display = ['email', 'is_verified', "user_type", "is_staff", "is_active", "id"]
     list_filter = ["user_type", "is_staff", "is_active"]
 
     fieldsets = (
@@ -38,14 +38,13 @@ class CustomUserAdmin(UserAdmin):
 @admin.register(Organizer)
 class OrganizerAdmin(admin.ModelAdmin):
     model = Organizer
-    list_display = ['user', 'name', 'website', 'contact_phone'] 
+    list_display = ['user', 'name', 'website', 'contact_phone',"id"] 
     search_fields = ['user', 'name']
     ordering = ['user', 'name']
-
 
 @admin.register(Attendee)
 class AttendeeAdmin(admin.ModelAdmin):
     model = Attendee
-    list_display = ['user', 'date_of_birth'] 
+    list_display = ['user', 'date_of_birth', "id"] 
     search_fields = ['user']
     ordering = ['user']
