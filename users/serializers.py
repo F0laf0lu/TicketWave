@@ -46,10 +46,12 @@ class OrganizerSerializer(serializers.ModelSerializer):
 
 
 class AttendeeSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Attendee
         fields = ["user", "date_of_birth", "contact_phone"]
         read_only_fields = ['user']
+
 
 class UserSerializer(serializers.ModelSerializer):
     attendee = AttendeeSerializer(required=False)
@@ -58,20 +60,54 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [ "id", 'email', "user_type", "attendee", "organizer"]
-        read_only_fields = ['user_type']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        
         attendee_exists = hasattr(instance, 'attendee') and instance.attendee is not None
         organizer_exists = hasattr(instance, 'organizer') and instance.organizer is not None
-        
         if attendee_exists:
             representation.pop('organizer', None)
         elif organizer_exists:
             representation.pop('attendee', None)
-            
         return representation
-    
+
+# Update User Serializers
+class AttendeeUpdateSerializer(serializers.ModelSerializer):
+    attendee = AttendeeSerializer(required=False)
+    class Meta:
+        model = get_user_model()
+        fields = ["id", 'email', "user_type", "attendee"]
+        read_only_fields = ['user_type', "email"]
+
     def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
+        print(validated_data['attendee'])
+        data = validated_data['attendee']
+
+        att_user = Attendee.objects.get(user__email=instance.attendee)
+        att_user.date_of_birth = data.get('date_of_birth', att_user.date_of_birth)
+        att_user.contact_phone = data.get('contact_phone', att_user.contact_phone)
+        att_user.save()
+        return instance
+
+
+
+
+class OrganizerUpdateSerializer(serializers.ModelSerializer):
+    organizer = OrganizerSerializer(required=False)
+    class Meta:
+        model = get_user_model()
+        fields = ["id", 'email', "user_type", "organizer"]
+        read_only_fields = ['user_type', "email"]
+
+    def update(self, instance, validated_data):
+        print(validated_data['organizer'])
+        data = validated_data['organizer']
+
+        org_user = Organizer.objects.get(user__email=instance.organizer)
+        org_user.name = data.get('name', org_user.name)
+        org_user.website = data.get('website', org_user.website)
+        org_user.bio = data.get('bio', org_user.bio)
+        org_user.contact_phone = data.get('contact_phone', org_user.contact_phone)
+        org_user.save()
+        return instance
+

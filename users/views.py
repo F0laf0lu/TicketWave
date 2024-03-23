@@ -6,14 +6,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, UpdateAPIView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 
 from users.utils import send_code_to_user
 from users.models import Attendee, Organizer
-from users.serializers import OtpCodeSerializer, UserSerializer, UserRegisterSerializer
+from users.serializers import AttendeeUpdateSerializer, OtpCodeSerializer, UserSerializer, UserRegisterSerializer, OrganizerUpdateSerializer
 from users.permissions import IsNotAuthenticated, IsUnverified, IsOwnerOrReadOnly
 import pyotp
 
@@ -31,17 +31,16 @@ class UsersProfileView(RetrieveUpdateAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['user_role'] = self.request.user.user_type
-        print(context)
         return context
 
-    def retrieve(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-        except Http404 as e:
-            return Response({"Error": str(e)}, status=status.HTTP_404_NOT_FOUND)
-
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            user_role = self.request.user.user_type
+            if user_role == 'attendee':
+                return AttendeeUpdateSerializer
+            elif user_role == 'organizer':
+                return OrganizerUpdateSerializer
+        return self.serializer_class
 
 
 # Permission - Only unverified users can access this
@@ -50,7 +49,7 @@ class UsersProfileView(RetrieveUpdateAPIView):
 def verify_email(request):
     email = request.user.email
     if request.method == 'POST':
-        # Send otp to user email
+        
         send_code_to_user(email)
         return Response(
                 {
