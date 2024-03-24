@@ -3,9 +3,13 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model 
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-
 from users.models import Organizer, Attendee
 from core.models import Event, Ticket, TicketType
+
+import os
+from django import setup
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ticketwave.testsettings')
+setup()
 
 class EventsTestCase(APITestCase):
     def setUp(self):

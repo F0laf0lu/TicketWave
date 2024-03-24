@@ -77,7 +77,6 @@ def get_ticket(request, event_id):
         serializer = TicketSerializer(data=request.data, context=context)
 
         if serializer.is_valid():
-            print(serializer.validated_data)
             ticket_type_id = serializer.validated_data['ticket_type_id']
             # Send ticket details to users mail or notifications - try signals
             success,message = TicketService.purchase_ticket(ticket_type_id)

@@ -80,7 +80,6 @@ class AttendeeUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ['user_type', "email"]
 
     def update(self, instance, validated_data):
-        print(validated_data['attendee'])
         data = validated_data['attendee']
 
         att_user = Attendee.objects.get(user__email=instance.attendee)
@@ -100,7 +99,7 @@ class OrganizerUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ['user_type', "email"]
 
     def update(self, instance, validated_data):
-        print(validated_data['organizer'])
+        
         data = validated_data['organizer']
 
         org_user = Organizer.objects.get(user__email=instance.organizer)

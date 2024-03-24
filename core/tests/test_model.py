@@ -3,7 +3,10 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from users.models import Organizer, Attendee
 from core.models import Event, Ticket, TicketType
-
+import os
+from django import setup
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ticketwave.testsettings')
+setup()
 # Create your tests here.
 
 class EventModelTests(TestCase):

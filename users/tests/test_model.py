@@ -1,8 +1,11 @@
 from django.db import IntegrityError
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-
 from users.models import Organizer, Attendee
+import os
+from django import setup
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ticketwave.testsettings')
+setup()
 
 # Create your tests here. 
 
@@ -43,7 +46,6 @@ class CustomUserTests(TestCase):
     def test_attendee_profile_created(self):
         user = Attendee.objects.get(user=self.user2)
         self.assertTrue(user)
-
 
     def test_update_created_profile(self):
         organizer = Organizer.objects.get(user=self.user1)
